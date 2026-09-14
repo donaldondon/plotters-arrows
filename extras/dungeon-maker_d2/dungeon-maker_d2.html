@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ダンジョンメーカー — プロトタイプ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14100c;
+    --bg-2: #1c1611;
+    --panel: #241c15;
+    --panel-2: #2c2219;
+    --stone: #362b20;
+    --gold: #c9973f;
+    --gold-bright: #eec27a;
+    --blood: #a3412f;
+    --blood-bright: #cf6248;
+    --teal: #3f7a6c;
+    --teal-bright: #63a894;
+    --parchment: #ece1c8;
+    --muted: #9c8d76;
+    --line: #4a3b2a;
+    --shadow: rgba(0,0,0,0.55);
+  }
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(201,151,63,0.10), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(163,65,47,0.10), transparent 55%),
+      var(--bg);
+    color: var(--parchment);
+    font-family: "EB Garamond", serif;
+    font-size: 17px;
+    line-height: 1.5;
+    display:flex;
+    justify-content:center;
+    padding: 28px 16px 60px;
+  }
+  h1,h2,h3, .disp{
+    font-family:"Cinzel", serif;
+    letter-spacing: 0.02em;
+    font-weight:700;
+    margin:0;
+  }
+  .mono{ font-family:"JetBrains Mono", monospace; }
+  .wrap{ width:100%; max-width: 920px; }
+
+  /* ---------- header ---------- */
+  .title-row{
+    display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px; margin-bottom: 22px;
+    flex-wrap: wrap; gap:8px;
+  }
+  .title-row h1{ font-size: 1.7rem; color: var(--gold-bright); text-shadow: 0 0 18px rgba(233,183,120,0.25);}
+  .title-row .sub{ color: var(--muted); font-size:0.85rem; letter-spacing:0.08em; text-transform:uppercase;}
+
+  /* ---------- panels ---------- */
+  .panel{
+    background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.03);
+    padding: 22px;
+  }
+  .panel + .panel{ margin-top:18px; }
+
+  /* ---------- setup ---------- */
+  .player-row{ display:flex; gap:10px; margin-bottom:10px; align-items:center; }
+  .player-row .num{ width:26px; color:var(--gold); font-family:"JetBrains Mono"; font-size:0.9rem;}
+  input[type=text]{
+    flex:1;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--parchment);
+    padding: 9px 12px;
+    font-family:"EB Garamond"; font-size:1rem;
+  }
+  input[type=text]:focus{ outline:none; border-color: var(--gold); }
+  .btnrow{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  button{
+    font-family:"Cinzel", serif;
+    font-size:0.82rem;
+    letter-spacing:0.04em;
+    text-transform: uppercase;
+    color: var(--parchment);
+    background: linear-gradient(180deg, #3a2e20, #2a2015);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 11px 18px;
+    cursor:pointer;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  button:hover{ border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+  button:active{ transform: scale(0.97); }
+  button.primary{ background: linear-gradient(180deg, var(--gold), #a97b30); color:#1c1408; border-color:#8a641f; }
+  button.primary:hover{ border-color: var(--gold-bright); }
+  button.danger{ background: linear-gradient(180deg, var(--blood), #7a2e21); border-color:#5c2419; }
+  button:disabled{ opacity:0.35; cursor:not-allowed; }
+  button.ghost{ background:transparent; }
+  .small-link{
+    background:none;border:none;color:var(--muted);text-decoration:underline;
+    font-family:"EB Garamond"; text-transform:none; letter-spacing:normal; font-size:0.85rem; padding:0; cursor:pointer;
+  }
+  .small-link:hover{ color: var(--gold-bright); border:none; box-shadow:none; }
+
+  /* ---------- top status bar during game ---------- */
+  .status-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:14px;
+    margin-bottom: 18px;
+  }
+  .status-chip{
+    display:flex; flex-direction:column; gap:2px;
+    border-left: 2px solid var(--gold);
+    padding: 2px 12px;
+  }
+  .status-chip .label{ font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); font-family:"Cinzel";}
+  .status-chip .value{ font-family:"JetBrains Mono"; font-size:1.15rem; color: var(--gold-bright); }
+
+  .scoreboard{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .score-pill{
+    display:flex; align-items:center; gap:8px;
+    background: var(--bg-2); border:1px solid var(--line); border-radius: 20px;
+    padding: 5px 12px 5px 6px; font-size:0.85rem;
+  }
+  .score-pill .dot{ width:8px;height:8px;border-radius:50%; background:var(--muted); }
+  .score-pill.is-gm .dot{ background: var(--blood-bright); box-shadow:0 0 6px var(--blood-bright); }
+  .score-pill .pts{ font-family:"JetBrains Mono"; color:var(--gold-bright); }
+
+  /* ---------- alcoves (the signature element) ---------- */
+  .corridor{
+    display:flex; gap:10px; justify-content:center; margin: 22px 0 10px;
+    flex-wrap: wrap;
+  }
+  .alcove{
+    position:relative;
+    width: 108px; height:150px;
+    background: radial-gradient(120% 100% at 50% 0%, #3a2e20 0%, #241b13 60%, #17110b 100%);
+    border: 1px solid var(--line);
+    border-top-left-radius: 54px;
+    border-top-right-radius: 54px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    padding-bottom:10px;
+    box-shadow: inset 0 8px 16px rgba(0,0,0,0.5);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .alcove .idx{
+    position:absolute; top:8px; left:0; right:0; text-align:center;
+    font-family:"JetBrains Mono"; font-size:0.7rem; color: var(--muted);
+  }
+  .alcove .glyph{ font-size:2.1rem; filter: drop-shadow(0 0 6px rgba(0,0,0,0.6)); }
+  .alcove .glyph.hidden{ color: var(--muted); font-family:"Cinzel"; font-size:1.6rem; }
+  .alcove.current{
+    border-color: var(--gold);
+    box-shadow: inset 0 8px 16px rgba(0,0,0,0.5), 0 0 22px rgba(201,151,63,0.35);
+    animation: flicker 2.2s infinite ease-in-out;
+  }
+  .alcove.cleared{ opacity:0.55; }
+  .alcove.result-success{ border-color: var(--teal-bright); box-shadow: inset 0 8px 16px rgba(0,0,0,0.5), 0 0 18px rgba(99,168,148,0.4); }
+  .alcove.result-fail{ border-color: var(--blood-bright); box-shadow: inset 0 8px 16px rgba(0,0,0,0.5), 0 0 18px rgba(207,98,72,0.4); }
+  @keyframes flicker{
+    0%,100%{ box-shadow: inset 0 8px 16px rgba(0,0,0,0.5), 0 0 22px rgba(201,151,63,0.35); }
+    50%{ box-shadow: inset 0 8px 16px rgba(0,0,0,0.5), 0 0 14px rgba(201,151,63,0.18); }
+  }
+
+  /* dm setup pool */
+  .pool{ display:flex; gap:10px; justify-content:center; margin: 14px 0 6px; flex-wrap:wrap; }
+  .pool-card{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    background: var(--bg-2); border:1px solid var(--line); border-radius:8px;
+    padding: 10px 14px; cursor:pointer; min-width:78px;
+  }
+  .pool-card .glyph{ font-size:1.6rem; }
+  .pool-card .cnt{ font-family:"JetBrains Mono"; font-size:0.75rem; color:var(--gold-bright); }
+  .pool-card.disabled{ opacity:0.3; cursor:not-allowed; }
+  .pool-card:not(.disabled):hover{ border-color: var(--gold); }
+  .hint{ text-align:center; color:var(--muted); font-size:0.88rem; margin-top:10px;}
+
+  /* adventurer action row */
+  .tool-row{ display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+  .tool-btn{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding: 14px 20px;
+  }
+  .tool-btn .g{ font-size:1.5rem; }
+
+  .dive-score{ text-align:center; margin-top:16px; }
+  .dive-score .n{ font-family:"JetBrains Mono"; font-size:2rem; color: var(--gold-bright); }
+  .dive-score .l{ font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); font-family:"Cinzel";}
+
+  .feedback{
+    text-align:center; font-family:"Cinzel"; font-size:1.1rem; letter-spacing:0.04em;
+    margin: 14px 0 4px; min-height: 1.4em;
+  }
+  .feedback.ok{ color: var(--teal-bright); }
+  .feedback.ng{ color: var(--blood-bright); }
+  .feedback.info{ color: var(--gold-bright); }
+
+  /* log */
+  .log{
+    max-height: 190px; overflow-y:auto;
+    border-top: 1px solid var(--line);
+    margin-top: 20px; padding-top: 10px;
+    display:flex; flex-direction:column-reverse;
+    gap:4px;
+  }
+  .log-entry{ font-size:0.82rem; color: var(--muted); }
+  .log-entry b{ color: var(--parchment); font-weight:600; }
+  .log-entry.bonus{ color: var(--gold-bright); }
+
+  .rule-note{
+    font-size:0.82rem; color:var(--muted); border-left:2px solid var(--line);
+    padding: 4px 12px; margin-top: 18px;
+  }
+  .rule-note summary{ cursor:pointer; color:var(--gold-bright); font-family:"Cinzel"; font-size:0.78rem; letter-spacing:0.06em; text-transform:uppercase; }
+  .rule-note ul{ margin: 8px 0 4px; padding-left: 18px; }
+  .rule-note li{ margin-bottom:4px; }
+
+  .center{ text-align:center; }
+  .gm-name{ color: var(--blood-bright); }
+  .adv-name{ color: var(--teal-bright); }
+
+  table.final{ width:100%; border-collapse:collapse; margin-top:12px; }
+  table.final th, table.final td{ padding:10px 8px; border-bottom:1px solid var(--line); text-align:left; }
+  table.final th{ font-family:"Cinzel"; font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+  table.final td.pts{ font-family:"JetBrains Mono"; color:var(--gold-bright); }
+  table.final tr.winner td{ color: var(--gold-bright); font-weight:600; }
+  .crown{ margin-right:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="title-row">
+    <h1>ダンジョンメーカー</h1>
+    <div class="sub">プロトタイプ v0.1</div>
+  </div>
+
+  <div id="app"></div>
+
+</div>
+
+<script>
+/* ======================================================================
+   ダンジョンメーカー — プロトタイプ
+   曖昧だったルールは以下のように解釈して実装しています(画面下部の
+   「ルール解釈メモ」にも同内容を表示):
+
+   1. 「1周」= その時点で残っている全プレイヤーが1回ずつダンジョン
+      マスター(GM)を務めること。これを3回繰り返した(3周した)時点、
+      または残りプレイヤーが1人になった時点でゲーム終了。
+   2. 初期ポイントは2人プレイで各10pt、3人目以降1人増えるごとに
+      各プレイヤーの初期ポイントに+5(3人=15pt、4人=20pt)。
+   3. GMのポイント = そのプレイヤー自身の累計ポイント。セッション専用の
+      持ち点ではなく、冒険者の成功で直接減り、失敗の没収やボーナスで
+      直接増える(=対戦性を持たせるための変更点)。
+   4. GMセッションは (a) GM自身のポイントが0になる (b) 全冒険者が
+      1回ずつ挑戦し終える、のどちらか早い方で終了。
+   5. どのプレイヤーもポイントがマイナスになった瞬間に敗北・脱落し、
+      以後の周回対象から外れる。残ったプレイヤーで続行し、1人だけ
+      残った時点でその人の勝利としてゲーム終了。
+   6. 「先頭が扉で追い返した」ボーナス = 1マス目が扉でそこに失敗した
+      冒険者から1ポイント徴収しGMに加算。
+      「最後がモンスターで宝に届かなかった」ボーナス = 5マス目が
+      モンスターで、その回に踏破できなかった(失敗 or 途中撤退)冒険者
+      1人につき「泉」から1ポイントをGMに加算(冒険者からは徴収しない)。
+      踏破成功時は「泉」から+3ポイントを冒険者が獲得。
+   ====================================================================== */
+
+const CARD = {
+  monster: { label:'モンスター', glyph:'👹', tool:'sword', toolLabel:'剣' },
+  trap:    { label:'罠',       glyph:'🕸️', tool:'disarm', toolLabel:'罠解除' },
+  door:    { label:'扉',       glyph:'🚪', tool:'key',    toolLabel:'鍵' },
+};
+const TOOLS = [
+  { id:'sword',  label:'剣',   glyph:'⚔️', beats:'monster' },
+  { id:'disarm', label:'罠解除', glyph:'🛠️', beats:'trap' },
+  { id:'key',    label:'鍵',   glyph:'🗝️', beats:'door' },
+];
+
+let state = null;
+
+function initialPoints(playerCount){
+  return 10 + Math.max(0, playerCount - 2) * 5;
+}
+
+function freshState(playerNames){
+  const startPts = initialPoints(playerNames.length);
+  return {
+    phase: 'dm-setup',
+    players: playerNames.map(n => ({ name:n, total:startPts, fountain:0, eliminated:false })),
+    gmIndex: 0,
+    lapsCompleted: 0,        // 0..3
+    gmSessionsThisLap: 0,
+    targetLaps: 3,
+    slots: [null,null,null,null,null],
+    pool: { monster:2, trap:2, door:2 },
+    adventurerOrder: [],
+    advPointer: 0,
+    dive: null, // {playerIdx, slotIdx, diveScore}
+    lastFeedback: null,
+    log: [],
+  };
+}
+
+function addLog(msg, cls){
+  state.log.push({ msg, cls: cls||'' });
+  if(state.log.length > 60) state.log.shift();
+}
+
+function gmPlayer(){ return state.players[state.gmIndex]; }
+function activePlayers(){ return state.players.filter(p=>!p.eliminated); }
+
+/* プレイヤーのポイントがマイナスになったら脱落させる。
+   残りが1人になったら即座にゲーム終了(勝利)とする。
+   戻り値: 今回新たに脱落したかどうか */
+function checkElimination(idx){
+  const p = state.players[idx];
+  if(p.eliminated || p.total >= 0) return false;
+  p.eliminated = true;
+  addLog(`<b>${esc(p.name)}</b> はポイントがマイナスになり脱落した。`, 'bonus');
+  if(activePlayers().length <= 1){
+    state.phase = 'gameover';
+  }
+  return true;
+}
+
+/* 現在のGMの次に控えている、脱落していないプレイヤーのインデックスを返す */
+function nextGmIndex(){
+  const n = state.players.length;
+  for(let step=1; step<=n; step++){
+    const idx = (state.gmIndex + step) % n;
+    if(!state.players[idx].eliminated) return idx;
+  }
+  return state.gmIndex;
+}
+
+function startGame(names){
+  state = freshState(names);
+  addLog(`ゲーム開始。最初のダンジョンマスターは <b>${esc(gmPlayer().name)}</b>。`, 'bonus');
+  render();
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+/* ---------------- DM setup ---------------- */
+function assignSlot(type){
+  const nextEmpty = state.slots.findIndex(s => s===null);
+  if(nextEmpty === -1) return;
+  if(state.pool[type] <= 0) return;
+  state.slots[nextEmpty] = type;
+  state.pool[type] -= 1;
+  render();
+}
+function undoSlot(idx){
+  const t = state.slots[idx];
+  if(t===null) return;
+  state.slots[idx] = null;
+  state.pool[t] += 1;
+  render();
+}
+function confirmSetup(){
+  if(state.slots.some(s=>s===null)) return;
+  state.phase = 'adventure';
+  state.adventurerOrder = state.players.map((_,i)=>i).filter(i=>i!==state.gmIndex && !state.players[i].eliminated);
+  state.advPointer = 0;
+  state.dive = null;
+  addLog(`<b>${esc(gmPlayer().name)}</b> がダンジョンを配置した。`, '');
+  beginNextDive();
+  render();
+}
+
+/* ---------------- adventure flow ---------------- */
+function beginNextDive(){
+  if(state.advPointer >= state.adventurerOrder.length || gmPlayer().total <= 0){
+    endGmSession();
+    return;
+  }
+  const pIdx = state.adventurerOrder[state.advPointer];
+  state.dive = { playerIdx: pIdx, slotIdx: 0, diveScore: 0, revealed: [false,false,false,false,false] };
+  state.lastFeedback = null;
+  addLog(`<b>${esc(state.players[pIdx].name)}</b> が挑戦を開始。`, '');
+}
+
+function currentAdventurerName(){
+  return state.players[state.dive.playerIdx].name;
+}
+
+function chooseTool(toolId){
+  const d = state.dive;
+  const slotType = state.slots[d.slotIdx];
+  const tool = TOOLS.find(t=>t.id===toolId);
+  const success = tool.beats === slotType;
+  d.revealed[d.slotIdx] = true;
+
+  if(success){
+    d.diveScore += 1;
+    const gm = gmPlayer();
+    gm.total -= 1;
+    state.lastFeedback = { text:`成功! ${CARD[slotType].label}を${tool.label}で突破 (+1)`, cls:'ok' };
+    addLog(`${esc(currentAdventurerName())}: ${CARD[slotType].label}に${tool.label}で成功。GM残り ${gm.total}pt。`, '');
+
+    if(checkElimination(state.gmIndex)){
+      // GMがこの一撃で脱落 → ダンジョン崩壊、冒険者はここまでの分を確保して終了
+      const player = state.players[d.playerIdx];
+      player.total += d.diveScore;
+      addLog(`ダンジョンは崩壊し、<b>${esc(player.name)}</b> はここまでの ${d.diveScore}pt を確保して脱出した。`, 'bonus');
+      state.lastFeedback = { text:`GM撃破!ダンジョン崩壊。${d.diveScore}ptを確保して脱出。`, cls:'ok' };
+      state.advPointer += 1;
+      state.dive = null;
+      if(state.phase !== 'gameover') endGmSession();
+      render();
+      return;
+    }
+
+    d.slotIdx += 1;
+    if(d.slotIdx >= 5){
+      finishDive('clear');
+      return;
+    }
+  } else {
+    state.lastFeedback = { text:`失敗… ${CARD[slotType].label}に${tool.label}は通用しなかった`, cls:'ng' };
+    addLog(`${esc(currentAdventurerName())}: ${CARD[slotType].label}に${tool.label}で失敗。`, '');
+    finishDive('fail');
+    return;
+  }
+  render();
+}
+
+function retreatNow(){
+  finishDive('retreat');
+}
+
+function finishDive(kind){
+  const d = state.dive;
+  const player = state.players[d.playerIdx];
+  const gm = gmPlayer();
+  const firstSlotType = state.slots[0];
+  const lastSlotType = state.slots[4];
+
+  if(kind === 'clear'){
+    const gained = d.diveScore + 3; // 泉ボーナス+3
+    player.total += gained;
+    player.fountain += 3;
+    state.lastFeedback = { text:`踏破成功!! 泉のボーナス+3を含め ${gained}pt 獲得。`, cls:'ok' };
+    addLog(`<b>${esc(player.name)}</b> がダンジョンを踏破!踏破ボーナス+3を含め ${gained}pt 獲得。`, 'bonus');
+  }
+  else if(kind === 'fail'){
+    // 没収
+    if(d.diveScore > 0){
+      gm.total += d.diveScore;
+      addLog(`没収: ${esc(player.name)}のこの回の獲得分 ${d.diveScore}pt がGMへ。`, '');
+    }
+    // 先頭が扉で即失敗 = 追い返しボーナス(冒険者から1pt徴収。泉ではない)
+    if(d.slotIdx === 0 && firstSlotType === 'door'){
+      player.total -= 1;
+      gm.total += 1;
+      addLog(`ボーナス: 扉に追い返された${esc(player.name)}から1ptをGMが徴収。`, 'bonus');
+      checkElimination(d.playerIdx);
+    }
+    // 最後がモンスターで踏破失敗 = 泉ボーナス(GMのみ増加)
+    if(lastSlotType === 'monster'){
+      gm.total += 1;
+      gm.fountain += 1;
+      addLog(`ボーナス: 最奥のモンスターに阻まれ、泉から+1ptをGMが得た。`, 'bonus');
+    }
+    d.diveScore = 0;
+  }
+  else if(kind === 'retreat'){
+    player.total += d.diveScore;
+    addLog(`${esc(player.name)} が撤退。獲得していた ${d.diveScore}pt を確保。`, '');
+    if(lastSlotType === 'monster'){
+      gm.total += 1;
+      gm.fountain += 1;
+      addLog(`ボーナス: 踏破できず撤退したため、泉から+1ptをGMが得た。`, 'bonus');
+    }
+  }
+
+  state.advPointer += 1;
+  state.dive = null;
+  if(state.phase !== 'gameover') { /* 続行 */ }
+  render();
+  // 少し間を置いてから次へ(演出用に一旦フィードバックを表示するのでボタンで進める)
+}
+
+function proceedAfterDive(){
+  state.lastFeedback = null;
+  beginNextDive();
+  render();
+}
+
+/* ---------------- session / lap rotation ---------------- */
+function endGmSession(){
+  const gm = gmPlayer();
+  addLog(`<b>${esc(gm.name)}</b> のGMセッション終了。現在のポイントは ${gm.total}pt。`, 'bonus');
+
+  state.gmSessionsThisLap += 1;
+  if(state.gmSessionsThisLap >= activePlayers().length){
+    state.gmSessionsThisLap = 0;
+    state.lapsCompleted += 1;
+  }
+
+  if(activePlayers().length <= 1){
+    state.phase = 'gameover';
+    render();
+    return;
+  }
+
+  if(state.lapsCompleted >= state.targetLaps){
+    state.phase = 'gameover';
+    render();
+    return;
+  }
+
+  // 次のGMへ(脱落者は飛ばす)
+  state.gmIndex = nextGmIndex();
+  state.slots = [null,null,null,null,null];
+  state.pool = { monster:2, trap:2, door:2 };
+  state.phase = 'dm-setup';
+  addLog(`次のダンジョンマスターは <b>${esc(gmPlayer().name)}</b>。`, 'bonus');
+  render();
+}
+
+/* ====================== RENDER ====================== */
+function render(){
+  const app = document.getElementById('app');
+  if(!state){ app.innerHTML = renderSetup(); attachSetupHandlers(); return; }
+
+  if(state.phase === 'gameover'){ app.innerHTML = renderGameOver(); attachGameOverHandlers(); return; }
+
+  let html = renderStatusBar();
+  if(state.phase === 'dm-setup') html += renderDmSetup();
+  else if(state.phase === 'adventure') html += renderAdventure();
+  html += renderLog();
+  html += renderRuleNote();
+  app.innerHTML = html;
+  attachGameHandlers();
+}
+
+function renderSetup(){
+  return `
+  <div class="panel">
+    <h2 style="color:var(--gold-bright); margin-bottom:6px;">冒険の準備</h2>
+    <p style="color:var(--muted); margin-top:0;">プレイヤー名を入力してください(2〜4人)。</p>
+    <div id="playerRows">
+      ${[0,1].map(i=>playerRowHtml(i)).join('')}
+    </div>
+    <div class="btnrow">
+      <button class="ghost" id="addPlayerBtn">+ プレイヤーを追加</button>
+    </div>
+    <p class="hint" id="ptsPreview" style="text-align:left;">初期ポイント: 各プレイヤー ${initialPoints(2)}pt(2人プレイ)</p>
+    <div class="btnrow">
+      <button class="primary" id="startBtn">ゲーム開始</button>
+    </div>
+  </div>`;
+}
+function playerRowHtml(i){
+  const defaults = ['プレイヤー1','プレイヤー2','プレイヤー3','プレイヤー4'];
+  return `<div class="player-row" data-row="${i}">
+    <div class="num">${i+1}</div>
+    <input type="text" value="${defaults[i]||('プレイヤー'+(i+1))}" maxlength="14"/>
+  </div>`;
+}
+function attachSetupHandlers(){
+  const rows = document.getElementById('playerRows');
+  document.getElementById('addPlayerBtn').onclick = () => {
+    const count = rows.children.length;
+    if(count >= 4) return;
+    const div = document.createElement('div');
+    div.innerHTML = playerRowHtml(count);
+    rows.appendChild(div.firstElementChild);
+    if(rows.children.length >= 4) document.getElementById('addPlayerBtn').disabled = true;
+    document.getElementById('ptsPreview').textContent =
+      `初期ポイント: 各プレイヤー ${initialPoints(rows.children.length)}pt(${rows.children.length}人プレイ)`;
+  };
+  document.getElementById('startBtn').onclick = () => {
+    const inputs = [...rows.querySelectorAll('input')];
+    const names = inputs.map((el,i)=> el.value.trim() || `プレイヤー${i+1}`);
+    startGame(names);
+  };
+}
+
+function renderStatusBar(){
+  const gm = gmPlayer();
+  return `
+  <div class="status-bar">
+    <div style="display:flex; gap:22px; flex-wrap:wrap;">
+      <div class="status-chip">
+        <div class="label">周回</div>
+        <div class="value">${state.lapsCompleted+1} / ${state.targetLaps}</div>
+      </div>
+      <div class="status-chip">
+        <div class="label">ダンジョンマスター</div>
+        <div class="value" style="color:var(--blood-bright)">${esc(gm.name)}</div>
+      </div>
+      <div class="status-chip">
+        <div class="label">GMのポイント</div>
+        <div class="value">${gm.total}</div>
+      </div>
+    </div>
+  </div>
+  <div class="scoreboard">
+    ${state.players.map((p,i)=>`
+      <div class="score-pill ${i===state.gmIndex?'is-gm':''}" style="${p.eliminated?'opacity:0.4;':''}">
+        <span class="dot"></span>${p.eliminated?'💀 ':''}${esc(p.name)}${p.eliminated?'(脱落)':''} <span class="pts">${p.total}pt</span>
+        <span class="mono" style="color:var(--teal-bright); font-size:0.78rem;">(泉${p.fountain})</span>
+      </div>`).join('')}
+  </div>`;
+}
+
+function renderDmSetup(){
+  const filled = state.slots.filter(s=>s!==null).length;
+  return `
+  <div class="panel">
+    <h3 style="color:var(--gold-bright);">ダンジョン配置 — <span class="gm-name">${esc(gmPlayer().name)}</span> のターン</h3>
+    <p style="color:var(--muted); margin-top:4px;">モンスター・罠・扉から選び、5つの部屋を手前(1)から奥(5)へ順に配置してください。</p>
+    <div class="corridor">
+      ${state.slots.map((s,i)=>`
+        <div class="alcove ${s===null?'':'current'}" ${s!==null?`onclick="undoSlot(${i})" title="クリックで取り消し"`:''}>
+          <div class="idx">${i+1}</div>
+          ${s===null ? `<div class="glyph hidden">空</div>` : `<div class="glyph">${CARD[s].glyph}</div>`}
+        </div>`).join('')}
+    </div>
+    <div class="pool">
+      ${Object.keys(CARD).map(type=>`
+        <div class="pool-card ${state.pool[type]<=0 || filled>=5 ? 'disabled':''}" onclick="${state.pool[type]>0 && filled<5 ? `assignSlot('${type}')`:''}">
+          <div class="glyph">${CARD[type].glyph}</div>
+          <div>${CARD[type].label}</div>
+          <div class="cnt">残り ${state.pool[type]}</div>
+        </div>`).join('')}
+    </div>
+    <div class="hint">配置した部屋をクリックすると取り消せます。6種のうち1枚は使いません。</div>
+    <div class="btnrow" style="justify-content:center;">
+      <button class="primary" id="confirmSetupBtn" ${filled<5?'disabled':''}>配置を確定して冒険者を招き入れる</button>
+    </div>
+  </div>`;
+}
+
+function renderAdventure(){
+  if(!state.dive){
+    // 演出待ち(直前のダイブ結果を見せている状態)
+    return `
+    <div class="panel center">
+      <div class="feedback ${state.lastFeedback?.cls||'info'}">${state.lastFeedback?.text || ''}</div>
+      <div class="btnrow" style="justify-content:center;">
+        <button class="primary" id="proceedBtn">次へ</button>
+      </div>
+    </div>`;
+  }
+  const d = state.dive;
+  return `
+  <div class="panel">
+    <h3 style="color:var(--gold-bright);">挑戦中 — <span class="adv-name">${esc(currentAdventurerName())}</span></h3>
+    <div class="corridor">
+      ${state.slots.map((s,i)=>{
+        let cls = 'alcove';
+        if(i < d.slotIdx) cls += ' cleared result-success';
+        else if(i === d.slotIdx) cls += ' current';
+        const shown = i < d.slotIdx;
+        return `<div class="${cls}">
+          <div class="idx">${i+1}</div>
+          <div class="glyph ${shown?'':'hidden'}">${shown ? CARD[s].glyph : '?'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="dive-score">
+      <div class="n">${d.diveScore}</div>
+      <div class="l">今回の獲得ポイント(未確定)</div>
+    </div>
+    <div class="tool-row">
+      ${TOOLS.map(t=>`
+        <button class="tool-btn" onclick="chooseTool('${t.id}')">
+          <span class="g">${t.glyph}</span>${t.label}
+        </button>`).join('')}
+      <button class="tool-btn danger" onclick="retreatNow()">
+        <span class="g">🏳️</span>撤退する
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderLog(){
+  return `
+  <div class="panel">
+    <h3 style="font-size:0.95rem; color:var(--muted);">冒険の記録</h3>
+    <div class="log">
+      ${[...state.log].reverse().map(e=>`<div class="log-entry ${e.cls}">${e.msg}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderRuleNote(){
+  return `
+  <details class="rule-note">
+    <summary>ルール解釈メモ(原案の曖昧な部分をこう実装しました)</summary>
+    <ul>
+      <li>初期ポイントは2人=10pt、3人=15pt、4人=20pt(1人増えるごとに+5)。</li>
+      <li>GMのポイント = 本人の累計ポイントそのもの。冒険者の成功で直接減り、没収やボーナスで直接増える。</li>
+      <li>「1周」= 生存している全員が1回ずつGMを務めること。3周でゲーム終了。</li>
+      <li>GMセッションは「GM自身のポイントが0」または「全冒険者が挑戦済み」で終了。</li>
+      <li>ポイントがマイナスになった瞬間そのプレイヤーは脱落。残り1人になったら即勝利でゲーム終了。</li>
+      <li>先頭=扉で失敗 → 冒険者から1pt徴収してGMへ。最奥=モンスターで踏破失敗 → 泉から+1ptをGMへ(冒険者からは徴収しない)。</li>
+      <li>完全踏破は泉から+3ptボーナス。</li>
+      <li>泉から得たポイント(踏破+3、最奥モンスター阻止+1)は「泉ポイント」として別枠でも集計。累計ポイントが同点で終了した場合、泉ポイントが多い方を最終勝利者とする。</li>
+    </ul>
+  </details>`;
+}
+
+function renderGameOver(){
+  const sorted = [...state.players].sort((a,b)=> (b.total-a.total) || (b.fountain-a.fountain));
+  const winner = sorted[0];
+  const tiedOnPoints = sorted.filter(p=>p.total===winner.total);
+  const decidedByFountain = tiedOnPoints.length > 1;
+  const trueTie = decidedByFountain && tiedOnPoints.filter(p=>p.fountain===winner.fountain).length > 1;
+  const byElimination = activePlayers().length <= 1 && state.lapsCompleted < state.targetLaps;
+  return `
+  <div class="panel">
+    <h2 style="color:var(--gold-bright);">${byElimination ? '脱落決着 — 最終結果' : '3周終了 — 最終結果'}</h2>
+    ${trueTie ? `<p style="color:var(--blood-bright);">ポイント・泉ポイントとも同点のため、正真正銘の引き分けです。</p>`
+      : decidedByFountain ? `<p style="color:var(--gold-bright);">ポイントが同点だったため、泉ポイントの多さで勝敗を決定しました。</p>` : ''}
+    <table class="final">
+      <thead><tr><th>順位</th><th>プレイヤー</th><th>累計ポイント</th><th>泉ポイント</th></tr></thead>
+      <tbody>
+        ${sorted.map((p,i)=>`
+          <tr class="${!trueTie && p===winner ? 'winner':''}">
+            <td>${i+1}</td>
+            <td>${!trueTie && p===winner ?'<span class="crown">👑</span>':''}${esc(p.name)}</td>
+            <td class="pts">${p.total}</td>
+            <td class="pts">${p.fountain}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="btnrow">
+      <button class="primary" id="restartBtn">もう一度プレイ</button>
+    </div>
+  </div>
+  ${renderLog()}`;
+}
+
+function attachGameHandlers(){
+  const confirmBtn = document.getElementById('confirmSetupBtn');
+  if(confirmBtn) confirmBtn.onclick = confirmSetup;
+  const proceedBtn = document.getElementById('proceedBtn');
+  if(proceedBtn) proceedBtn.onclick = proceedAfterDive;
+}
+function attachGameOverHandlers(){
+  document.getElementById('restartBtn').onclick = () => { state = null; render(); };
+}
+
+// expose for inline onclick handlers
+window.assignSlot = assignSlot;
+window.undoSlot = undoSlot;
+window.chooseTool = chooseTool;
+window.retreatNow = retreatNow;
+
+render();
+</script>
+</body>
+</html>
