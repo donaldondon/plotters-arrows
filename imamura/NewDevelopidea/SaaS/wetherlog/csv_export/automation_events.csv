@@ -1,0 +1,7 @@
+﻿event_id,event_type,source,payload_summary,status,triggered_at
+1,severe_weather_alert,Make.com シナリオ,2026-08-10 宇都宮市: 降水量52.3mmを検知しSlackへ警報通知,sent,2026-09-14
+2,severe_weather_alert,Make.com シナリオ,2026-01-18 日光市: 最低気温-8.1℃を検知しSlackへ注意喚起通知,sent,2026-09-15
+3,form_submission,Google Forms,体感天気アンケート回答受付: 「蒸し暑い」栃木県宇都宮市,logged,2026-09-16
+4,form_submission,Google Forms,体感天気アンケート回答受付: 「肌寒い」栃木県那須塩原市,logged,2026-09-17
+5,subscription_created,Stripe Webhook (test mode),田中 舞 さんがProプランに登録（テストモード）,processed,2026-09-18
+6,subscription_canceled,Stripe Webhook (test mode),鈴木 大輔 さんがProプランを解約（テストモード）,processed,2026-09-19

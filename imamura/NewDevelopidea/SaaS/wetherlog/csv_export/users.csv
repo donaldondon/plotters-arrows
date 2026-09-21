@@ -1,0 +1,9 @@
+﻿user_id,name,email,plan,stripe_customer_id,home_location,created_at
+1,佐藤 恵,sato.megumi@example.com,pro,cus_test_14933636,足利市,2026-09-20T15:52:28
+2,鈴木 大輔,suzuki.daisuke@example.com,free,cus_test_20439411,足利市,2026-09-20T15:52:28
+3,高橋 蒼,takahashi.aoi@example.com,free,cus_test_31139119,宇都宮市,2026-09-20T15:52:28
+4,田中 舞,tanaka.mai@example.com,pro,cus_test_56821955,那須塩原市,2026-09-20T15:52:28
+5,伊藤 蓮,ito.ren@example.com,free,cus_test_54382237,足利市,2026-09-20T15:52:28
+6,渡辺 さくら,watanabe.sakura@example.com,pro,cus_test_19451607,日光市,2026-09-20T15:52:28
+7,山本 陸,yamamoto.riku@example.com,free,cus_test_48493470,日光市,2026-09-20T15:52:28
+8,中村 陽菜,nakamura.hina@example.com,trial,cus_test_64437819,宇都宮市,2026-09-20T15:52:28

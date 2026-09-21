@@ -1,0 +1,6 @@
+﻿subscription_id,user_id,plan_name,price_jpy,billing_cycle,status,current_period_end,stripe_subscription_id,created_at
+1,1,Proプラン,980,monthly,active,2026-10-13,sub_test_36656723,2026-09-20T15:52:28
+2,4,Proプラン,980,monthly,active,2026-09-25,sub_test_83625904,2026-09-20T15:52:28
+3,6,Proプラン,980,monthly,active,2026-10-15,sub_test_77425898,2026-09-20T15:52:28
+4,8,Proプラン(トライアル),0,monthly,trialing,2026-10-01,sub_test_96031384,2026-09-20T15:52:28
+5,2,Proプラン,980,monthly,canceled,2026-09-10,sub_test_66976307,2026-09-20T15:52:28

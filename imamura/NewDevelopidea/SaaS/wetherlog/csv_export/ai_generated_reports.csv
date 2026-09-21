@@ -1,0 +1,3 @@
+﻿report_id,user_id,target_date,target_city,tone,prompt_summary,generated_text,model_name,status,created_at
+1,1,2026-09-18,宇都宮市,ビジネスメール調,本日の天気・気温をもとに、取引先へ送る挨拶文の書き出しを生成,,,draft,2026-09-20T15:52:28
+2,2,2026-09-19,那須塩原市,カジュアル・SNS投稿調,本日の天気・気温をもとに、SNSに投稿する一言コメントを生成,,,draft,2026-09-20T15:52:28
