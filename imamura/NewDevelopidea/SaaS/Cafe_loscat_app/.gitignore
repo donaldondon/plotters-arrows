@@ -1,0 +1,39 @@
+# ==== Node / Next.js (frontend) ====
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.vercel
+
+# ==== Supabase ====
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# ==== Python (python_prototype) ====
+python_prototype/__pycache__/
+python_prototype/*.pyc
+python_prototype/.venv/
+python_prototype/dist/
+python_prototype/build/
+python_prototype/*.spec
+python_prototype/signage_output/
+
+# ==== 環境変数 (共通) ====
+.env
+.env.local
+
+# ==== OS ====
+.DS_Store
+Thumbs.db
+
+# ==== エディタ ====
+.vscode/
+.idea/
+*.swp
